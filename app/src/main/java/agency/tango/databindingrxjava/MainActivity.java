@@ -1,7 +1,6 @@
 package agency.tango.databindingrxjava;
 
 import android.databinding.DataBindingUtil;
-import android.databinding.Observable;
 import android.databinding.Observable.OnPropertyChangedCallback;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
@@ -30,12 +29,7 @@ public class MainActivity extends AppCompatActivity {
         public ObservableBoolean helloButtonEnabled = new ObservableBoolean(false);
 
         public MainViewModel() {
-            OnPropertyChangedCallback buttonUpdater = new OnPropertyChangedCallback() {
-                @Override
-                public void onPropertyChanged(Observable sender, int propertyId) {
-                    updateButtonEnabledState();
-                };
-            };
+            OnPropertyChangedCallback buttonUpdater = new BindingCallbackAdapter(this::updateButtonEnabledState);
             firstName.addOnPropertyChangedCallback(buttonUpdater);
             lastName.addOnPropertyChangedCallback(buttonUpdater);
         }
