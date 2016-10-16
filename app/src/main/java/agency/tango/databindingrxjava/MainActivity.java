@@ -1,6 +1,8 @@
 package agency.tango.databindingrxjava;
 
 import android.databinding.DataBindingUtil;
+import android.databinding.Observable;
+import android.databinding.Observable.OnPropertyChangedCallback;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.os.Bundle;
@@ -8,9 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import agency.tango.databindingrxjava.databinding.ActivityMainBinding;
-import rx.Observable;
-
-import static agency.tango.databindingrxjava.RxUtils.toObservable;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,14 +30,19 @@ public class MainActivity extends AppCompatActivity {
         public ObservableBoolean helloButtonEnabled = new ObservableBoolean(false);
 
         public MainViewModel() {
+            OnPropertyChangedCallback buttonUpdater = new OnPropertyChangedCallback() {
+                @Override
+                public void onPropertyChanged(Observable sender, int propertyId) {
+                    updateButtonEnabledState();
+                };
+            };
+            firstName.addOnPropertyChangedCallback(buttonUpdater);
+            lastName.addOnPropertyChangedCallback(buttonUpdater);
+        }
 
-            Observable.combineLatest(toObservable(firstName), toObservable(lastName), (firstName, lastName) -> StringUtils.isNotNullOrEmpty(firstName) && StringUtils.isNotNullOrEmpty(lastName))
-                    .subscribe(result -> {
-                        helloButtonEnabled.set(result);
-                        if (!result) {
-                            helloText.set(StringUtils.EMPTY);
-                        }
-                    }, Throwable::printStackTrace);
+        private void updateButtonEnabledState() {
+            boolean enable = StringUtils.isNotNullOrEmpty(firstName.get()) && StringUtils.isNotNullOrEmpty(lastName.get());
+            helloButtonEnabled.set(enable);
         }
 
         public void buttonClicked() {
